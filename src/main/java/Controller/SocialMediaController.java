@@ -2,8 +2,12 @@ package Controller;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import Model.Account;
+import Service.AccountService;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
@@ -12,6 +16,7 @@ import Model.Account;
  */
 public class SocialMediaController {
     ObjectMapper mapper = new ObjectMapper();
+    AccountService accService = new AccountService();
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
      * suite must receive a Javalin object from this method.
@@ -21,6 +26,7 @@ public class SocialMediaController {
         Javalin app = Javalin.create();
         app.get("example-endpoint", this::exampleHandler);
         app.post("register", (context) -> this.registerUser(context));
+        app.post("login", this::loginUser);
 
         return app;
     }
@@ -33,9 +39,28 @@ public class SocialMediaController {
         context.json("sample text");
     }
 
-    private void registerUser(Context context) {
+    // I don't understand why the IDE wanted me to add this throws declaration to the function?
+    private void registerUser(Context context) throws JsonMappingException, JsonProcessingException {
         Account userAccount = mapper.readValue(context.body(), Account.class);
-        
+        Account resultAcc = accService.addNewAccount(userAccount);
+        System.out.println(resultAcc);
+        if (resultAcc == null) {
+            context.status(400);
+        } else {
+            context.status(200);
+            context.json(resultAcc);
+        }
+    }
+
+    private void loginUser(Context context) throws JsonMappingException, JsonProcessingException {
+        Account userAccount = mapper.readValue(context.body(), Account.class);
+        Account verifiedUser = accService.authenticateAccount(userAccount);
+        if (verifiedUser == null) {
+            context.status(401);
+        } else {
+            context.status(200);
+            context.json(verifiedUser);
+        }
     }
 
 
