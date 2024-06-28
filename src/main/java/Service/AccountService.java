@@ -1,23 +1,25 @@
 package Service;
 
 import Model.Account;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import Model.Message;
 import DAO.AccountDAOImpl;
+import java.util.List;
+
+// Service class for Account handling
 
 public class AccountService {
     AccountDAOImpl accountDAO = new AccountDAOImpl();
 
     public Account addNewAccount(Account account) {
-        Account returnAcc = null;
 
         if (accountDAO.getAccountByUsername(account.getUsername()) != null) {
-            return returnAcc;
+            return null;
         }
         if (account.getUsername().length() == 0) {
-            return returnAcc;
+            return null;
         }
         else if (account.getPassword().length() < 4) {
-            return returnAcc;
+            return null;
         }
         return accountDAO.insertAccount(account);
     }
@@ -35,7 +37,12 @@ public class AccountService {
             return userAccount;
         }
         else {
-            return userAccount = null;
+            return null;
         }
     }
+
+    public List<Message> getAccountMessages(int accId) {
+        return accountDAO.getAccountMessages(accId);
+    }
+
 }
